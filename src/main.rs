@@ -39,7 +39,35 @@ fn offset<T>(n: u32) -> *const c_void {
 
 
 // == // Modify and complete the function below for the first task
-// unsafe fn FUNCTION_NAME(ARGUMENT_NAME: &Vec<f32>, ARGUMENT_NAME: &Vec<u32>) -> u32 { } 
+unsafe fn vao_setup(vertex_coordinates: &Vec<f32>, arr_indices: &Vec<u32>) -> u32 {
+    let mut vao_ID:u32 = 0;
+    gl::GenVertexArrays(1,&mut vao_ID);
+    gl::BindVertexArray(vao_ID); //Opens the "file" that is the VOA so it is in the statemachine
+
+    let mut buf_IDs:u32 = 0;
+    gl::GenBuffers(1, &mut buf_IDs);
+    gl::BindBuffer(gl::ARRAY_BUFFER, buf_IDs);
+
+    gl::BufferData(
+        gl::ARRAY_BUFFER,
+        byte_size_of_array(vertex_coordinates),
+        pointer_to_array(vertex_coordinates),
+        gl::STATIC_DRAW
+    );
+        gl::VertexAttribPointer(0,2,gl::FLOAT,gl::FALSE,0,ptr::null());
+        gl::EnableVertexAttribArray(0);
+
+        let mut index_buf_IDs:u32 = 0;
+        gl::GenBuffers(1, &mut index_buf_IDs);
+        gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER,index_buf_IDs);
+        gl::BufferData(
+            gl::ELEMENT_ARRAY_BUFFER,
+            byte_size_of_array(arr_indices),
+            pointer_to_array(arr_indices),
+            gl::STATIC_DRAW,
+        );
+        return vao_ID;
+ } 
 
 fn main() {
     // Set up the necessary objects to deal with windows and event handling
@@ -92,22 +120,101 @@ fn main() {
             println!("GLSL\t: {}", util::get_gl_string(gl::SHADING_LANGUAGE_VERSION));
         }
 
-        // == // Set up your VAO here
-        unsafe {
+        // OBS OBS - Always check that the correct multiple of tringles in the draw-function further down is correct//
+
+        // let vertex_cooridnates: Vec<f32> = vec![-0.9, 0.0, 0.0, 
+        //                                         -0.7, 0.0, 0.0, 
+        //                                         -0.8, 0.15, 0.0,
+        //                                         // -0.7, 0.0, 0.0, 
+        //                                         -0.5, 0.0, 0.0, 
+        //                                         -0.6, 0.15, 0.0,
+        //                                         //-0.5, 0.0, 0.0,
+        //                                         -0.3, 0.0, 0.0,
+        //                                         -0.4, 0.15, 0.0,
+        //                                         //-0.3, 0.0, 0.0,
+        //                                         -0.1, 0.0, 0.0,
+        //                                         -0.2, 0.15, 0.0,
+        //                                         //-0.1, 0.0, 0.0,
+        //                                         -0.1, -0.2,0.0,
+        //                                         0.05,-0.1,0.0
+        //                                         ];
+        // let arr_indices: Vec<u32> = vec![0, 1, 2,
+        //                                  1, 3, 4,
+        //                                  3,5,6,
+        //                                  5,7,8,
+        //                                  7,9,10];
+        // let vao1: u32 = unsafe {vao_setup(&vertex_cooridnates, &arr_indices)};
+
+        //Task 2 a)//
+        // let vertex_cooridnates2: Vec<f32> = vec![0.6, -0.8, -1.2, 
+        //                                         0.0, 0.4, -0.2, 
+        //                                         -1.2, 0.0, 1.2];
+        // let arr_indices2: Vec<u32> = vec![0, 1, 2];
+
+        // let vao2: u32 = unsafe {vao_setup(&vertex_cooridnates2, &arr_indices2)};
+
+        //Task 2b)//
+        // let vertex_cooridnates3: Vec<f32> = vec![-0.3,  0.1, 0.0, 
+        //                                           0.3,  0.1, 0.0, 
+        //                                          -0.3,  0.4, 0.0,//
+        //                                          -0.2, -0.1, 0.0,
+        //                                           0.4, -0.1, 0.0,
+        //                                           0.4, -0.4, 0.0
+        //                                           ];
+        // let arr_indices3: Vec<u32> = vec![0, 2, 1,
+        //                                   3, 5, 4,
+        //                                   ];
+
+        // let vao3: u32 = unsafe {vao_setup(&vertex_cooridnates3, &arr_indices3)};
+        //Task 2 a)//
+        // let vertex_cooridnates4: Vec<f32> = vec![-0.6, -0.4,0.0, 
+        //                                         -0.4, -0.4, 0.0, 
+        //                                         -0.5, -0.2, 0.0];
+        // let arr_indices4: Vec<u32> = vec![0, 1, 2];
+
+        // let vao4: u32 = unsafe {vao_setup(&vertex_cooridnates4, &arr_indices4)};
+
+        //Task 3 - Draw a circle//
+        let mut vertex_cooridnates_circle: Vec<f32> = vec![0.5, 0.0];
+        let mut arr_indices_circle: Vec<u32> = vec![0];
+        let pi:f32 = 3.14159;
+        let mut theta:f32 = 0.0;
+        let mut x: f32 = 0.0;
+        let mut y:f32 = 0.0;
+        let number_of_points_in_circle :u32 = 1000;
+        let rad_in_circle: f32 = 2.0*pi;
+        let rad_between_vertices:f32 = rad_in_circle/number_of_points_in_circle as f32;
+        let radius:f32 = 0.5;
+        for i in 1..number_of_points_in_circle{
+            x = radius*(rad_between_vertices*i as f32).cos();
+            vertex_cooridnates_circle.push(x);
+            
+            y = radius*(rad_between_vertices*i as f32).sin();
+            vertex_cooridnates_circle.push(y);
+
+            arr_indices_circle.push(i);
+            arr_indices_circle.push(i);
 
         }
+
+
+        let vao5: u32 = unsafe {vao_setup(&vertex_cooridnates_circle, &arr_indices_circle)};
+
+
+
 
         // Basic usage of shader helper:
         // The example code below returns a shader object, which contains the field `.program_id`.
         // The snippet is not enough to do the assignment, and will need to be modified (outside of
         // just using the correct path), but it only needs to be called once
         //
-        //     shader::ShaderBuilder::new()
-        //        .attach_file("./path/to/shader.file")
-        //        .link();
-        unsafe {
-
-        }
+        let shader = unsafe{shader::ShaderBuilder::new()
+            .attach_file("./shaders/simple.frag")
+            .attach_file("./shaders/simple.vert")
+            .link()
+        };
+        unsafe{shader.activate()};
+       
 
         // Used to demonstrate keyboard handling -- feel free to remove
         let mut _arbitrary_number = 0.0;
@@ -150,11 +257,12 @@ fn main() {
                 gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
                 // Issue the necessary commands to draw your scene here
-
-
-
-
-
+                gl::DrawElements(
+                    gl::LINES,
+                    2000,               //OBS!!!!!! HAS TO BE CHANGED BASED ON NUBER OF TRINAGLES/LINES!!!! 3*number of tringles/2*number of lines                 
+                    gl::UNSIGNED_INT,
+                    ptr::null()
+                );
             }
 
             context.swap_buffers().unwrap();
